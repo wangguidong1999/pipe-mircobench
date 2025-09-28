@@ -468,11 +468,11 @@ int main(int argc, char** argv) {
   // std::cout << "./write --write_with_vmsplice --huge_page | ./read --read_with_splice\n";
   // std::cout << "./write --write_with_vmsplice --huge_page --busy_loop | ./read --read_with_splice --busy_loop\n";
   std::cout << "\n测试说明：\n";
-  std::cout << "- baseline：普通write()/read()通过管道传输，存在用户态/内核态之间两次拷贝，吞吐主要受内存带宽与调度/唤醒开销影响。\n";
+  std::cout << "- baseline：普通write()/read()通过管道传输，存在用户态/内核态之间两次拷贝。（体现默认管道性能）\n";
   std::cout << "- vmsplice：写端用vmsplice将用户页“赠与”管道，消除写端用户->内核拷贝；读端仍read()，保留一次拷贝。\n";
-  std::cout << "- vmsplice+splice：读端改用splice，写端vmsplice；双零拷贝，用户态参与最少，接近管道实现上限。\n";
+  std::cout << "- vmsplice+splice：读端改用splice，写端vmsplice；双零拷贝，用户态参与最少。（接近管道实现上限）\n";
   std::cout << "- vmsplice+splice+hugepage：双零拷贝基础上启用大页，降低TLB/页表开销。\n";
-  std::cout << "- vmsplice+splice+hugepage+busy：配合非阻塞+忙轮询，减少调度/唤醒延迟，逼近系统上限（会吃满 CPU）。\n";
+  std::cout << "- vmsplice+splice+hugepage+busy：配合非阻塞+忙轮询，减少调度/唤醒延迟。（逼近系统上限）\n";
   // std::cout << "注：倍率为相对baseline的提升倍数；具体数值受内核版本、CPU/内存拓扑、频率策略等影响。\n";
   return 0;
 }
