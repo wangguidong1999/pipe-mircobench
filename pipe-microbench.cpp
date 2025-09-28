@@ -255,7 +255,7 @@ struct OneRun {
 struct RunnerCfg {
   int writer_cpu = 0;
   int reader_cpu = 1;
-  bool pin = true;
+  bool pin = false;
 };
 
 static OneRun run_once(Options wopt, Options ropt, const RunnerCfg& rcfg) {
@@ -327,12 +327,14 @@ struct Cli {
   int runs = 3;
   int writer_cpu = 0;
   int reader_cpu = 1;
-  bool pin = true;
+  bool pin = false;
   bool help = false;
 };
 
 static Cli parse_cli_only(int argc, char** argv) {
   Cli c;
+  bool cpu_specified = false;
+  bool no_pin = false;
   for (int i = 1; i < argc; ++i) {
     std::string a = argv[i];
     auto need_val = [&](const char* opt)->const char*{
@@ -343,14 +345,18 @@ static Cli parse_cli_only(int argc, char** argv) {
       c.runs = std::max(1, atoi(need_val(a.c_str())));
     } else if (a == "--writer-cpu") {
       c.writer_cpu = atoi(need_val("--writer-cpu"));
+      cpu_specified = true;
     } else if (a == "--reader-cpu") {
       c.reader_cpu = atoi(need_val("--reader-cpu"));
+      cpu_specified = true;
     } else if (a == "--no-pin") {
-      c.pin = false;
+      // c.pin = false;
+      no_pin = true;
     } else if (a == "--help" || a == "-h") {
       c.help = true;
     }
   }
+  c.pin = cpu_specified && !no_pin;
   return c;
 }
 
@@ -359,9 +365,9 @@ static void print_help(const char* argv0) {
   printf("提示：需用sudo执行；或执行命令允许非特权用户打开涉及内核的perf事件（sudo sysctl -w kernel.perf_event_paranoid=1）\n");
   printf("用法: ./%s [选项]\n", bn.c_str());
   printf("-n, --runs N            每组重复次数（默认 3）\n");
-  printf("--writer-cpu ID         写端绑核（默认 0）\n");
-  printf("--reader-cpu ID         读端绑核（默认 1）\n");
-  printf("--no-pin                禁用绑核（不使用 sched_setaffinity）\n");
+  printf("--writer-cpu ID         写端绑核（默认不绑核）\n");
+  printf("--reader-cpu ID         读端绑核（默认不绑核）\n");
+  printf("--no-pin                强制禁用绑核（不使用 sched_setaffinity）\n");
   printf("示例:\n");
   printf("./%s -n 5 --writer-cpu 2 --reader-cpu 3\n", bn.c_str());
 }
@@ -413,9 +419,14 @@ int main(int argc, char** argv) {
   // 标题块
   std::cout << "[Pipes speed test]\n";
   std::cout << "pipes microbench  | runs=" << cli.runs << "\n";
-  std::cout << "pinning: writer_cpu=" << rcfg.writer_cpu
-            << "  reader_cpu=" << rcfg.reader_cpu << (rcfg.pin ? "" : "  (disabled)") << "\n\n";
-
+  // std::cout << "pinning: writer_cpu=" << rcfg.writer_cpu
+  //           << "  reader_cpu=" << rcfg.reader_cpu << (rcfg.pin ? "" : "  (disabled)") << "\n\n";
+  if (rcfg.pin) {
+    std::cout << "pinning: writer_cpu=" << rcfg.writer_cpu
+              << "  reader_cpu=" << rcfg.reader_cpu << "\n\n";
+  } else {
+    std::cout << "pinning: (disabled)\n\n";
+  }
   // 逐组逐次运行并打印
   std::vector<double> medians(5, 0.0);
   for (int ci = 0; ci < 5; ++ci) {
