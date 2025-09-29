@@ -362,7 +362,7 @@ static Cli parse_cli_only(int argc, char** argv) {
 
 static void print_help(const char* argv0) {
   std::string bn = basename_of(argv0);
-  printf("提示：需用sudo执行；或执行命令允许非特权用户打开涉及内核的perf事件（sudo sysctl -w kernel.perf_event_paranoid=1）\n");
+  // printf("提示：需用sudo执行；或执行命令允许非特权用户打开涉及内核的perf事件（sudo sysctl -w kernel.perf_event_paranoid=1）\n");
   printf("用法: ./%s [选项]\n", bn.c_str());
   printf("-n, --runs N            每组重复次数（默认 3）\n");
   printf("--writer-cpu ID         写端绑核（默认不绑核）\n");
