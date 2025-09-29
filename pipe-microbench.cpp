@@ -135,7 +135,7 @@ finished:
 
 static void writer_run(Options options) {
   signal(SIGPIPE, SIG_IGN);
-  perf_init();
+  // perf_init();
 
   if (options.pipe_size && options.write_with_vmsplice) {
     fail("cannot write with vmsplice and set the pipe size manually. it will be automatically determined.");
@@ -160,8 +160,8 @@ static void writer_run(Options options) {
     }
   }
 
-  reset_perf_count();
-  enable_perf_count();
+  // reset_perf_count();
+  // enable_perf_count();
 
   if (options.write_with_vmsplice) {
     char* bufs[2];
@@ -180,9 +180,9 @@ static void writer_run(Options options) {
     with_write(options, buf);
   }
 
-  disable_perf_count();
-  log_perf_count();
-  perf_close();
+  // disable_perf_count();
+  // log_perf_count();
+  // perf_close();
 }
 
 // ---------- 读端（修正 pollfd.fd=STDIN_FILENO） ----------
@@ -382,11 +382,11 @@ int main(int argc, char** argv) {
   }
 
   // perf 权限检查：避免后面跑出一堆 "Error opening leader" 与 0.000 结果
-  if (!perf_permission_ok()) {
-    fprintf(stderr,
-      "提示：需用sudo执行；或允许非特权用户打开会涉及内核的perf事件（sudo sysctl -w kernel.perf_event_paranoid=1）\n");
-    return 2; // 非零退出，表示权限不足
-  }
+  // if (!perf_permission_ok()) {
+  //   fprintf(stderr,
+  //     "提示：需用sudo执行；或允许非特权用户打开会涉及内核的perf事件（sudo sysctl -w kernel.perf_event_paranoid=1）\n");
+  //   return 2; // 非零退出，表示权限不足
+  // }
   
   // 从 argv 中剥离自定义的参数，只把剩余参数交给 parse_options
   std::vector<char*> filtered;
